@@ -26,6 +26,7 @@ main = scotty 3000 $
     evt <- jsonData :: ActionM GitlabEvent
     cfg <- lift botConfig
     lift $ print $ show cfg
+    lift $ print $ show $ toJSON $ toSlack cfg evt
     lift $ W.postWith opts (exportURL $ _botConfigMattermostIncoming cfg) (toJSON $ toSlack cfg evt)
     lift $ print $ show $ encode $ toSlack cfg evt
     status ok200
@@ -49,9 +50,16 @@ toSlack c (PushEvent _ _ _ _ _ _ userName _ _ _ _ project commits _) =
   <> T.unlines (pushCommitToMarkDown <$> commits)
   <> "\n to " <> _projectName project)
 toSlack c (IssueEvent _ user _ _ _ _) = toIncoming c (_userUserName user <> " modified issue")
+toSlack c (PipelineEvent _ _ user project commit builds) =
+  toIncoming c ("builds initiated by " <>  _userUserName user
+  <> " in project " <> _pipelineEventProjectName project
+  <> "\n" <> T.unlines (buildToMarkDown <$> builds))
 
 pushCommitToMarkDown :: Commit -> T.Text
 pushCommitToMarkDown c = "- " <> "[" <> _commitMessage c <> "]" <> "(" <> T.pack (exportURL $ _commitUrl c) <> ")"
+
+buildToMarkDown :: Build -> T.Text
+buildToMarkDown b = "id: " <> (T.pack $ show $ _buildId b) <> " status: " <> _buildStatus b
 
 toIncoming :: BotConfig -> T.Text -> SlackIncoming
 toIncoming c t = SlackIncoming t (_botConfigChannel c) (_botConfigUsername c) (_botConfigIconEmoij c)

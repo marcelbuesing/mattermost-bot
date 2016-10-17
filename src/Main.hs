@@ -9,7 +9,7 @@ import           Data.Maybe                  (fromJust, fromMaybe)
 import           Data.Monoid                 ((<>))
 import qualified Data.Text as T
 import           Data.Yaml                   (decodeFile)
-import           GitlabHooks.Data.Types
+import           GitlabApi.Data
 import           Network.Connection          (TLSSettings (..))
 import           Network.HTTP.Client.TLS     (mkManagerSettings)
 import           Network.HTTP.Types.Status   (ok200)
@@ -44,7 +44,7 @@ readCfg :: IO (Maybe BotConfig)
 readCfg = decodeFile "./botconfig.yaml"
 
 toSlack :: BotConfig -> GitlabEvent -> SlackIncoming
-toSlack c (PushEvent _ _ _ _ _ _ userName _ _ _ _ project commits _) =
+toSlack c (WHPushEvent _ _ _ _ _ _ userName _ _ _ _ project commits _) =
   toIncoming c (
   userName <> " pushed \n"
   <> T.unlines (pushCommitToMarkDown <$> commits)
@@ -59,7 +59,7 @@ pushCommitToMarkDown :: Commit -> T.Text
 pushCommitToMarkDown c = "- " <> "[" <> _commitMessage c <> "]" <> "(" <> T.pack (exportURL $ _commitUrl c) <> ")"
 
 buildToMarkDown :: Build -> T.Text
-buildToMarkDown b = "id: " <> (T.pack $ show $ _buildId b) <> " status: " <> _buildStatus b
+buildToMarkDown b = "id: " <> T.pack (show $ _buildId b) <> " status: " <> _buildStatus b
 
 toIncoming :: BotConfig -> T.Text -> SlackIncoming
 toIncoming c t = SlackIncoming t (_botConfigChannel c) (_botConfigUsername c) (_botConfigIconEmoij c)

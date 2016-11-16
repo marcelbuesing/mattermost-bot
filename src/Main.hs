@@ -14,6 +14,7 @@ import           Network.Connection          (TLSSettings (..))
 import           Network.HTTP.Client.TLS     (mkManagerSettings)
 import           Network.HTTP.Types.Status   (ok200)
 import           Network.URL                 (URL, importURL, exportURL)
+import           Network.Wai.Middleware.RequestLogger
 import qualified Network.Wreq as W
 import           Web.Scotty
 
@@ -21,6 +22,7 @@ import           MattermostBot.Data
 
 main :: IO ()
 main = scotty 9666 $ do
+  middleware logStdoutDev
   post "/gitlab/webhooks" $ do
     cfg <- lift botConfig
     lift $ print $ show cfg

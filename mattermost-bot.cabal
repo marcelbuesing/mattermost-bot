@@ -32,6 +32,7 @@ executable mattermost-bot
                      , text >= 1.2
                      , transformers >= 0.5
                      , url >= 2.1
+                     , wai-extra >= 3.0
                      , wreq >= 0.4
                      , yaml >= 0.8.18
   hs-source-dirs:      src

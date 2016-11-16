@@ -67,11 +67,12 @@ whToSlack c (PipelineEvent _ _ user project commit builds) =
   <> "\n" <> T.unlines (buildToMarkDown <$> builds))
 
 shToSlack :: BotConfig -> SystemHook-> SlackIncoming
-shToSlack c (SHPushEvent _ _ _ _ _ userName _ _ _ _ project commits _) =
+shToSlack c (SHPushEvent _ _ _ sha _ userName _ _ _ _ project commits _) =
   toIncoming c (
-  userName <> " pushed \n"
+  userName <> " pushed "
+  <> "[" <> sha <> "](" <> commitHomepage project sha <> ")"
   <> T.unlines (pushCommitToMarkDown <$> commits)
-  <> "\n to " <> _projectName project)
+  <> " to " <> "[" <> _projectName project <> "](" <> (T.pack $ exportURL $ _projectHomepage project) <> ")")
 shToSlack c (ProjectCreated _ _ _ name _ ownerName _ pathWithNamespace id _) =
   toIncoming c (":new: " <> ownerName <> " created a new project " <> name <> " " <> parenthesize  pathWithNamespace)
 shToSlack c (ProjectDestroyed _ _ _ name _ ownerName _ pathWithNamespace _ _) =
@@ -90,3 +91,6 @@ toIncoming c t = SlackIncoming t (_botConfigChannel c) (_botConfigUsername c) (_
 
 parenthesize :: T.Text -> T.Text
 parenthesize inner = "(" <> inner <> ")"
+
+commitHomepage :: Project -> T.Text -> T.Text
+commitHomepage p sha = (T.pack $ exportURL $ _projectHomepage p) <> "/commit/" <> sha

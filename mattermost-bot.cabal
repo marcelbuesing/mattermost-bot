@@ -23,6 +23,7 @@ executable mattermost-bot
   -- other-extensions:
   build-depends:       aeson >= 0.11
                      , base >=4.9 && <4.10
+                     , bytestring >= 0.10
                      , connection >= 0.2
                      , gitlab-api >= 0.1
                      , http-client-tls >= 0.2.4

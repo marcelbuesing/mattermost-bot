@@ -1,4 +1,6 @@
-channel:            TownsSquare
-username:           λmatterbot
-iconEmoij:          ":ghost:"
-mattermostIncoming: "https://..."
+channel:               townssquare
+username:              λmatterbot
+iconEmoij:             ghost
+mattermostIncoming:    https://.../hooks/...
+gitlabApiUrl:          https://my-gitlab-instance.com/
+gitlabApiPrivateToken: xxx-xxxxx

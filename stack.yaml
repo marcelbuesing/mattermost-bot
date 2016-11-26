@@ -24,7 +24,7 @@ packages:
 - '.'
 - location:
     git: https://github.com/marcelbuesing/gitlab-api.git
-    commit: abd850cf936fa7729b259bbc62ff51e91d2619f8
+    commit: afb5345470bb3b4f151c339e5dc4793a8594c570
 #  extra-dep: true
 #    commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 # - location: https://github.com/commercialhaskell/stack/commit/cc16cb34f40af7e37776a6d760a02cbcc9be4fa9

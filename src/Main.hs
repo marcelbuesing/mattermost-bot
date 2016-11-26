@@ -27,14 +27,12 @@ main = scotty 9666 $ do
   middleware logStdoutDev
   post "/gitlab/webhooks" $ do
     cfg <- lift botConfig
-    lift $ print $ show cfg
     hdr <- header "X-Gitlab-Event"
     evt <- jsonData :: ActionM GitlabEvent
     lift $ W.postWith opts (exportURL $ _botConfigMattermostIncoming cfg) (toJSON $ whToSlack cfg evt)
     status ok200
   post "/gitlab/systemhooks" $ do
     cfg <- lift botConfig
-    lift $ print $ show cfg
     hdr <- header "X-Gitlab-Event"
     evt <- jsonData :: ActionM SystemHook
     out <- lift $ toJSON <$> shToSlack cfg evt
@@ -71,16 +69,16 @@ whToSlack c (PipelineEvent _ _ user project commit builds) =
 shToSlack :: BotConfig -> SystemHook-> IO SlackIncoming
 shToSlack c (SHPushEvent _ _ _ sha _ userName _ _ pid _ project commits _) = do
   cd <- commitDetails c pid sha
-  let additions = T.pack $ show $ _commitStatsAdditions $ _commitSingleStats $ cd
-      deletions = T.pack $ show $ _commitStatsDeletions $ _commitSingleStats $ cd
+  let additions = T.pack $ show $ _commitStatsAdditions $ _commitSingleStats cd
+      deletions = T.pack $ show $ _commitStatsDeletions $ _commitSingleStats cd
       projectUrl = "[" <> _projectName project <> "](" <> (T.pack $ exportURL $ _projectHomepage project) <> ")"
       shaUrl = "[" <> sha <> "](" <> commitHomepage project sha <> ")"
   return $ toIncoming c (
     userName <> " pushed " <> " to " <> projectUrl
     <> "\nRef:\t\t\t " <> shaUrl
-    <> "\nMessage:\t " <> _commitSingleMessage cd
-    <> "Stats:\t\t " <> "(+" <> additions <> " lines / -" <> deletions <> " lines)"
-    <> "\nTime:\t\t " <> _commitSingleCommittedDate cd)
+    <> "\nStats:\t\t " <> "(+" <> additions <> " lines / -" <> deletions <> " lines)"
+    <> "\nTime:\t\t " <> _commitSingleCommittedDate cd
+    <> "\nMessage: `" <> T.strip ( _commitSingleMessage cd)  <> "`")
 shToSlack c (ProjectCreated _ _ _ name _ ownerName _ pathWithNamespace id _) =
   return $ toIncoming c (":new: " <> ownerName <> " created a new project " <> name <> " " <> parenthesize  pathWithNamespace)
 shToSlack c (ProjectDestroyed _ _ _ name _ ownerName _ pathWithNamespace _ _) =

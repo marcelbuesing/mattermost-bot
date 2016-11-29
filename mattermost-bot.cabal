@@ -25,6 +25,7 @@ executable mattermost-bot
                      , base >=4.9 && <4.10
                      , bytestring >= 0.10
                      , connection >= 0.2
+                     , data-default >= 0.7
                      , gitlab-api >= 0.1
                      , http-client-tls >= 0.2.4
                      , http-types >= 0.9

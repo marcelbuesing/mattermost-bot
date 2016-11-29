@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 module MattermostBot.Data.Config where
 
-import Data.Maybe (fromJust)
-import Data.Text as T
+import           Data.Default                (Default, def)
+import           Data.Maybe                  (fromJust)
+import           Data.Text as T
 import qualified Data.Yaml as Y
-import Data.Yaml (FromJSON(..), (.:))
-import Network.URL (URL, importURL)
+import           Data.Yaml                   (FromJSON(..), (.:))
+import           Network.URL                 (URL, importURL)
 
 import MattermostBot.Data.Slack
 
@@ -32,3 +33,8 @@ instance FromJSON BotConfig where
     ((fromJust . importURL) <$> v .:   "gitlabApiUrl") <*>
     v .:   "gitlabApiPrivateToken"
   parseJSON _ = fail "Expected Object for Config value"
+
+instance Default BotConfig where
+  def = BotConfig "TownsSquare" "λmatterbot" ":ghost:" matterMostUrl gitlabUrl "tkn"
+    where matterMostUrl = fromJust $ importURL "mattermostIncoming"
+          gitlabUrl = fromJust $ importURL "https://gitlab.example.com"

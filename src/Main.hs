@@ -6,6 +6,7 @@ import           Control.Lens
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Data.Aeson
+import           Data.Default                (def)
 import           Data.Maybe                  (fromJust, fromMaybe)
 import           Data.Monoid                 ((<>))
 import qualified Data.Text as T
@@ -43,13 +44,7 @@ main = scotty 9666 $ do
 opts = W.defaults & W.manager .~ Left (mkManagerSettings (TLSSettingsSimple True False False) Nothing)
 
 botConfig :: IO BotConfig
-botConfig = fromMaybe defaultCfg <$> readCfg
-
-defaultCfg :: BotConfig
-defaultCfg =
-  let matterMostUrl = fromJust $ importURL "mattermostIncoming"
-      gitlabUrl = fromJust $ importURL "https://gitlab.example.com"
-  in BotConfig "TownsSquare" "λmatterbot" ":ghost:" matterMostUrl gitlabUrl "tkn"
+botConfig = fromMaybe def <$> readCfg
 
 readCfg :: IO (Maybe BotConfig)
 readCfg = decodeFile "./botconfig.yaml"

@@ -10,8 +10,8 @@ import           Network.URL                 (URL, importURL)
 
 import MattermostBot.Data.Slack
 
-
 type GitlabApiPrivateToken = Text
+type GitlabSystemHookSecret= Text
 
 data BotConfig = BotConfig
   { _botConfigChannel :: SlackChannel
@@ -21,6 +21,7 @@ data BotConfig = BotConfig
   -- | base url e.g. https://gitlab.example.com
   , _botConfigGitlabApiUrl :: URL
   , _botConfigGitlabApiPrivateToken :: GitlabApiPrivateToken
+  , _botConfigGitlabSHSecret :: GitlabSystemHookSecret
   } deriving Show
 
 instance FromJSON BotConfig where
@@ -31,10 +32,11 @@ instance FromJSON BotConfig where
     v .:   "iconEmoij" <*>
     ((fromJust . importURL) <$> v .:   "mattermostIncoming") <*>
     ((fromJust . importURL) <$> v .:   "gitlabApiUrl") <*>
-    v .:   "gitlabApiPrivateToken"
+    v .: "gitlabApiPrivateToken" <*>
+    v .: "gitlabSystemHookSecret"
   parseJSON _ = fail "Expected Object for Config value"
 
 instance Default BotConfig where
-  def = BotConfig "TownsSquare" "λmatterbot" ":ghost:" matterMostUrl gitlabUrl "tkn"
+  def = BotConfig "TownsSquare" "λmatterbot" ":ghost:" matterMostUrl gitlabUrl "tkn" "secret"
     where matterMostUrl = fromJust $ importURL "mattermostIncoming"
           gitlabUrl = fromJust $ importURL "https://gitlab.example.com"

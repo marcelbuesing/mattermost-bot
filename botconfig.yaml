@@ -1,6 +1,7 @@
-channel:               townssquare
-username:              λmatterbot
-iconEmoij:             ghost
-mattermostIncoming:    https://.../hooks/...
-gitlabApiUrl:          https://my-gitlab-instance.com/
-gitlabApiPrivateToken: xxx-xxxxx
+channel:                townssquare
+username:               λmatterbot
+iconEmoij:              ghost
+mattermostIncoming:     https://.../hooks/...
+gitlabApiUrl:           https://my-gitlab-instance.com/
+gitlabApiPrivateToken:  xxx-xxxxx
+gitlabSystemHookSecret: topSecret

@@ -3,6 +3,7 @@
 module Main where
 
 import           Control.Lens
+import           Control.Monad (unless, when)
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Data.Aeson
@@ -10,6 +11,7 @@ import           Data.Default                (def)
 import           Data.Maybe                  (fromJust, fromMaybe)
 import           Data.Monoid                 ((<>))
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import           Data.Text.Encoding          (encodeUtf8)
 import           Data.Yaml                   (decodeFile)
 import           GitlabApi.Data
@@ -28,16 +30,21 @@ main = scotty 9666 $ do
   middleware logStdoutDev
   post "/gitlab/webhooks" $ do
     cfg <- lift botConfig
-    hdr <- header "X-Gitlab-Event"
+    tkn <- header "X-Gitlab-Token"
     evt <- jsonData :: ActionM GitlabEvent
-    lift $ W.postWith opts (exportURL $ _botConfigMattermostIncoming cfg) (toJSON $ whToSlack cfg evt)
+    let url = exportURL $ _botConfigMattermostIncoming cfg
+        msg = toJSON $ whToSlack cfg evt
+        isTkn = (TL.toStrict <$> tkn) == (Just $  _botConfigGitlabSHSecret cfg)
+     in lift $ when isTkn (return () <$> W.postWith opts url msg)
     status ok200
   post "/gitlab/systemhooks" $ do
     cfg <- lift botConfig
-    hdr <- header "X-Gitlab-Event"
+    tkn <- header "X-Gitlab-Token"
     evt <- jsonData :: ActionM SystemHook
-    out <- lift $ toJSON <$> shToSlack cfg evt
-    lift $ W.postWith opts (exportURL $ _botConfigMattermostIncoming cfg) out
+    let url =  exportURL $ _botConfigMattermostIncoming cfg
+        msg = toJSON <$> shToSlack cfg evt
+        isTkn = (TL.toStrict <$> tkn) == (Just $  _botConfigGitlabSHSecret cfg)
+     in lift $ when isTkn (return () <$> (msg >>= W.postWith opts url))
     status ok200
 
 -- | disable tls
@@ -66,7 +73,7 @@ shToSlack c (SHPushEvent _ _ _ sha _ userName _ _ pid _ project commits _) = do
   cd <- commitDetails c pid sha
   let additions = T.pack $ show $ _commitStatsAdditions $ _commitSingleStats cd
       deletions = T.pack $ show $ _commitStatsDeletions $ _commitSingleStats cd
-      projectUrl = "[" <> _projectName project <> "](" <> (T.pack $ exportURL $ _projectHomepage project) <> ")"
+      projectUrl = "[" <> _projectName project <> "](" <> T.pack (exportURL $ _projectHomepage project) <> ")"
       shaUrl = "[" <> sha <> "](" <> commitHomepage project sha <> ")"
   return $ toIncoming c (
     userName <> " pushed " <> " to " <> projectUrl
@@ -99,7 +106,7 @@ commitHomepage p sha = T.pack (exportURL $ _projectHomepage p) <> "/commit/" <> 
 commitDetails :: BotConfig -> ProjectId -> CommitRef -> IO CommitSingle
 commitDetails c pid cr = do
   resp <- let gitlabApi = _botConfigGitlabApiUrl c
-              url =  (exportURL gitlabApi) <> "/api/v3/projects/" <> (show pid) <> "/repository/commits/" <> (T.unpack cr)
+              url =  exportURL gitlabApi <> "/api/v3/projects/" <> show pid <> "/repository/commits/" <> T.unpack cr
               tkn = encodeUtf8 (_botConfigGitlabApiPrivateToken c)
               opt = W.defaults & W.header "PRIVATE-TOKEN" .~ [tkn]
           in W.asJSON =<< W.getWith opt url :: IO (W.Response CommitSingle)

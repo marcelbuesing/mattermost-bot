@@ -1,16 +1,25 @@
-env:
-
+env: 
 before_install:
-  - travis_retry wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | sudo apt-key add -
-  - travis_retry echo 'deb http://download.fpcomplete.com/ubuntu/precise stable main'|sudo tee /etc/apt/sources.list.d/fpco.list
-  - travis_retry sudo apt-get update
-  - travis_retry sudo apt-get install stack -y
-
+- travis_retry wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key
+  | sudo apt-key add -
+- travis_retry echo 'deb http://download.fpcomplete.com/ubuntu/precise stable main'|sudo
+  tee /etc/apt/sources.list.d/fpco.list
+- travis_retry sudo apt-get update
+- travis_retry sudo apt-get install stack -y
 install:
-  - stack --version
-  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
-  - stack setup
-  - stack install --test
-
+- stack --version
+- echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo
+  '?')]"
+- stack setup
+- stack install --test
 script:
-  - stack build && stack test
+- stack build && stack test
+deploy:
+  provider: releases
+  api_key:
+    secure: qdoPaSRfvuOScLU3JlPVVby9vGh54UCFFS6RjlQlp1PA8wOT+maaWClvzXCOTnA5IpTeSKXXv0bfACWbqLUF1KIgEIWWNYnNHhPbfx5dAxLCz3v7L0x9Pe/vg8Ps8wgWpEgxmykN+yyXf4A5Rsyfx54PK/dePorCF/qkRrYipBUJq0AwS2i3xPcjdhsNScmklrcCusr3TCWrS2FoJXkgTDP7Kiix0W1IR3+MoC/FQ8mALer1DMl2ORGIWhNXxt4ecVG62XNP28rJQ/uicCoZRnyzzNyoJ9qacBpv81bT+MTtzcD79ZRdvNZoaAwLaOHxgfn2psISwJLCp3sukKTz+OfQ9XpRs4HADI/bPM5TgdBa/lZXgLZvbLNZdbRWZFjf0wG8R44b/tzTvWgIH6lGfmdmr5GV2jjNtfRPMd+GC7jBgtFw2AQLZ5GnpHzEps9PoTmOfQI/huvQuq7d3NIHPkS7RJXgyDS8kb6QdDZeT5+gLYR0tw1DC2kzpH+CHVpdrurdX85AWb6JI6DH65gdjKHVW8isAedMqEXxwlHi5AqJcbW9JpemPspuMUI+8AlKIhHOCirFM6z8w8xRufnoqi6+zNA+W9PUoYEK2Ee7rL4biBL4sFEVigYX/bth5a0/7+spaIncbbPOcXweABGXCbptdwApHybGEog1mjh/d/E=
+  file: "./.stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/mattermost-bot/mattermost-bot"
+  on:
+    repo: marcelbuesing/mattermost-bot
+    branch: dev
+    tags: true

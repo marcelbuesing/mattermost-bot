@@ -81,12 +81,18 @@ shToSlack c (SHPushEvent _ _ _ sha _ userName _ _ pid _ project commits _) = do
     <> "\nStats:\t\t " <> "(+" <> additions <> " lines / -" <> deletions <> " lines)"
     <> "\nTime:\t\t " <> _commitSingleCommittedDate cd
     <> "\nMessage: `" <> T.strip ( _commitSingleMessage cd)  <> "`")
-shToSlack c (ProjectCreated _ _ _ name _ ownerName _ pathWithNamespace id _) =
-  return $ toIncoming c (":new: " <> ownerName <> " created a new project " <> name <> " " <> parenthesize  pathWithNamespace)
-shToSlack c (ProjectDestroyed _ _ _ name _ ownerName _ pathWithNamespace _ _) =
-  return $ toIncoming c (":x: project " <> name <> " deleted " <> parenthesize pathWithNamespace)
-shToSlack c (ProjectRenamed _ _ _ name _ ownerName _ pathWithNamespace pathWithNamespaceOld _ _) =
-  return $ toIncoming c (":pencil: project " <> name <> " renamed " <> parenthesize (pathWithNamespaceOld <> " -> " <> pathWithNamespace))
+shToSlack c (ProjectCreated _ _ _ name _ ownerName _ pathWithNamespace id _) = do
+  let msg = ":new: " <> ownerName <> " created a new project "
+         <> name <> " " <> parenthesize  pathWithNamespace
+  return $ toIncoming c msg
+shToSlack c (ProjectDestroyed _ _ _ name _ ownerName _ pathWithNamespace _ _) = do
+  let msg = ":x: project " <> name
+         <> " deleted " <> parenthesize pathWithNamespace
+  return $ toIncoming c msg
+shToSlack c (ProjectRenamed _ _ _ name _ ownerName _ pathWithNamespace pathWithNamespaceOld _ _) = do
+  let msg = ":pencil: project " <> name <> " renamed "
+         <> parenthesize (pathWithNamespaceOld <> " -> " <> pathWithNamespace)
+  return $ toIncoming c msg
 
 pushCommitToMarkDown :: Commit -> T.Text
 pushCommitToMarkDown c = "- " <> "[" <> _commitMessage c <> "]" <> "(" <> T.pack (exportURL $ _commitUrl c) <> ")"

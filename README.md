@@ -14,7 +14,7 @@ A mattermost bot, posting Gitlab commits to a configured mattermost channel.
   - Copy the Url of your Gitlab instance to `gitlabApiUrl` in your botconfig.yaml e.g. https://my-gitlab.com/
 - Setup an "Incoming Webhook" in Mattermost (Integrations -> "Incoming Webhook")
   - Copy URL to `mattermostIncoming` in botconfig.yaml
-- Configure target `channel` in botconfig.yaml
+- Configure target `channel` in botconfig.yaml. Notice: Lower case channel name e.g. `my-channel`!
 - Copy your botconfig.yaml into the same folder as the mattermost-bot binary.
 - Run the bot `./mattermost-bot`
 ## Tested on

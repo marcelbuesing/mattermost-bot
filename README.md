@@ -1,6 +1,10 @@
 # mattermost-bot
 A mattermost bot, posting Gitlab commits to a configured mattermost channel.
 
+## Tested on
+Mattermost 3.7.x
+Gitlab 8.16.x
+
 ## Setup
 - Copy config template file botconfig.yaml
 -Setup a Systemhook (via Administrator Panel) in Gitlab pointing to the server instance where the bot should run:
@@ -17,6 +21,7 @@ A mattermost bot, posting Gitlab commits to a configured mattermost channel.
 - Configure target `channel` in botconfig.yaml. Notice: Lower case channel name e.g. `my-channel`!
 - Copy your botconfig.yaml into the same folder as the mattermost-bot binary.
 - Run the bot `./mattermost-bot`
-## Tested on
-Mattermost 3.7.x
-Gitlab 8.16.x
+
+## Build
+- Install stack, if you haven't already
+- Run `stack build`
